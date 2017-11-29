@@ -1,0 +1,26 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: primary-domain-ingress
+  annotations:
+    io.rancher.scheduler.global: "true"
+spec:
+  rules:
+  - host: wejlgaard.com
+    http:
+      paths:
+      - backend:
+          serviceName: wejlgaardcom-webserver
+          servicePort: 80
+  - host: rasmus.space
+    http:
+      paths:
+      - backend:
+          serviceName: wejlgaardcom-webserver
+          servicePort: 80
+  - host: www.zrw.io
+    http:
+      paths:
+      - backend:
+          serviceName: zrwio-webserver
+          servicePort: 80
