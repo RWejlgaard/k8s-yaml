@@ -24,3 +24,21 @@ spec:
       - backend:
           serviceName: zrwio-webserver
           servicePort: 80
+  - host: zrw.io
+    http:
+      paths:
+      - backend:
+          serviceName: zrwio-webserver
+          servicePort: 80
+  - host: redis.wejlgaard.com
+    http:
+      paths:
+      - backend:
+          serviceName: redis-service
+          servicePort: 80
+  - host: redis.zrw.io
+    http:
+      paths:
+      - backend:
+          serviceName: redis-service
+          servicePort: 80

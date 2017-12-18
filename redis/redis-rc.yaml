@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: redis-rc
+spec:
+  replicas: 1
+  selector:
+    k8s-app: redis
+  template:
+    metadata:
+      labels:
+        k8s-app: redis
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+      - name: redis
+        image: robtec/webdis
+        ports:
+        - containerPort: 80
