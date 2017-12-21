@@ -3,10 +3,16 @@ kind: Ingress
 metadata:
   name: primary-domain-ingress
   annotations:
-    io.rancher.scheduler.global: "true"
+          kubernetes.io/ingress.global-static-ip-name: domain-endpoint
 spec:
   rules:
   - host: wejlgaard.com
+    http:
+      paths:
+      - backend:
+          serviceName: wejlgaardcom-webserver
+          servicePort: 80
+  - host: www.wejlgaard.com
     http:
       paths:
       - backend:

@@ -1,0 +1,177 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: primary-domain-ingress
+  annotations:
+          kubernetes.io/ingress.global-static-ip-name: domain-endpoint
+spec:
+  rules:
+  - host: wejlgaard.com
+    http:
+      paths:
+      - backend:
+          serviceName: wejlgaardcom-webserver
+          servicePort: 80
+  - host: www.wejlgaard.com
+    http:
+      paths:
+      - backend:
+          serviceName: wejlgaardcom-webserver
+          servicePort: 80
+  - host: rasmus.space
+    http:
+      paths:
+      - backend:
+          serviceName: wejlgaardcom-webserver
+          servicePort: 80
+  - host: www.zrw.io
+    http:
+      paths:
+      - backend:
+          serviceName: zrwio-webserver
+          servicePort: 80
+  - host: zrw.io
+    http:
+      paths:
+      - backend:
+          serviceName: zrwio-webserver
+          servicePort: 80
+  - host: redis.wejlgaard.com
+    http:
+      paths:
+      - backend:
+          serviceName: redis-service
+          servicePort: 80
+  - host: redis.zrw.io
+    http:
+      paths:
+      - backend:
+          serviceName: redis-service
+          servicePort: 80
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: wejlgaardcom-webserver
+spec:
+  replicas: 1
+  selector:
+    k8s-app: wejlgaardcom-webserver
+  template:
+    metadata:
+      labels:
+        k8s-app: wejlgaardcom-webserver
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+      - name: wejlgaardcom-webserver
+        image: webdevops/php-nginx:latest
+        env:
+        - name: WEB_DOCUMENT_ROOT
+          value: "/var/www/wejlgaard.com"
+        - name: WEB_DOCUMENT_INDEX
+          value: "index.php"
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - mountPath: /var/www
+          name: wejlgaardcom-git-volume
+      volumes:
+      - name: wejlgaardcom-git-volume
+        gitRepo:
+          repository: "https://github.com/rwejlgaard/wejlgaard.com.git"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wejlgaardcom-webserver
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  type: NodePort
+  selector:
+    k8s-app: wejlgaardcom-webserver
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: zrwio-webserver
+spec:
+  replicas: 1
+  selector:
+    k8s-app: zrwio-webserver
+  template:
+    metadata:
+      labels:
+        k8s-app: zrwio-webserver
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+      - name: zrwio-webserver
+        image: webdevops/php-nginx:latest
+        env:
+        - name: WEB_DOCUMENT_ROOT
+          value: "/var/www/zrw.io"
+        - name: WEB_DOCUMENT_INDEX
+          value: "index.html"
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - mountPath: /var/www
+          name: zrwio-git-volume
+      volumes:
+      - name: zrwio-git-volume
+        gitRepo:
+          repository: "https://github.com/rwejlgaard/zrw.io.git"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zrwio-webserver
+  labels:
+    k8s-app: zrwio-webserver
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  type: NodePort
+  selector:
+    k8s-app: zrwio-webserver
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: redis-rc
+spec:
+  replicas: 1
+  selector:
+    k8s-app: redis
+  template:
+    metadata:
+      labels:
+        k8s-app: redis
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+      - name: redis
+        image: robtec/webdis
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+spec:
+  ports:
+  - port: 80
+    targetPort: 7379
+    protocol: TCP
+  type: NodePort
+  selector:
+    k8s-app: redis
