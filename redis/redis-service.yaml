@@ -1,12 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: redis-service
+  name: redis-webdis
 spec:
   ports:
   - port: 80
     targetPort: 7379
     protocol: TCP
+    name: http
   type: NodePort
   selector:
-    k8s-app: redis
+    k8s-app: redis-webdis

@@ -40,13 +40,13 @@ spec:
     http:
       paths:
       - backend:
-          serviceName: redis-service
+          serviceName: redis-webdis
           servicePort: 80
   - host: redis.zrw.io
     http:
       paths:
       - backend:
-          serviceName: redis-service
+          serviceName: redis-webdis
           servicePort: 80
 ---
 apiVersion: v1
@@ -146,19 +146,19 @@ spec:
 apiVersion: v1
 kind: ReplicationController
 metadata:
-  name: redis-rc
+  name: redis-webdis
 spec:
   replicas: 1
   selector:
-    k8s-app: redis
+    k8s-app: redis-webdis
   template:
     metadata:
       labels:
-        k8s-app: redis
+        k8s-app: redis-webdis
     spec:
       terminationGracePeriodSeconds: 60
       containers:
-      - name: redis
+      - name: redis-webdis
         image: robtec/webdis
         ports:
         - containerPort: 80
@@ -166,12 +166,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: redis-service
+  name: redis-webdis
 spec:
   ports:
   - port: 80
     targetPort: 7379
     protocol: TCP
+    name: http
   type: NodePort
   selector:
-    k8s-app: redis
+    k8s-app: redis-webdis
